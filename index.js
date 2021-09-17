@@ -60,7 +60,6 @@ async function parseDir(count) {
     return new Promise((resolve, reject) => {
       const reg = res.media.replace(new RegExp(`${defRes.media}/`), '');
       const filePath = path.resolve(__dirname, `${DATA_NAME}/${res.name}`);
-      console.log(reg, 22)
       fs.unlink(filePath, (err) => {
         if (err) {
           console.error('Error delete files ', err.message);
