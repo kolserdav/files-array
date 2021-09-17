@@ -68,7 +68,7 @@ async function parseDir(count) {
       const key = keys[i];
       switch(key) {
         case 'media':
-            resObj.media = `${dataObj.media}/${clearExt(dataObj.name)}${EXTENSION}`;
+            resObj.media = `${dataObj.media}/${clearExt(dataObj.name.split(FILE_PREFIX)[0])}${EXTENSION}`;
           break;
         default:
         
