@@ -8,7 +8,7 @@ const DATA_PATH = path.resolve(__dirname, DATA_NAME); // Путь до папк�
 const FILE_PREFIX = '_'; // Разбитель в названии файла
 
 /**
- * Функция парсинга директории с выводом JSON строк объектов
+ * Глобальная функция парсинга директории с выводом JSON строк объектов
  *  частей названия файлов в директории по количеству первых файлов
  *  переданному в аргументе
  * @param {number} count 
@@ -33,7 +33,7 @@ const FILE_PREFIX = '_'; // Разбитель в названии файла
 async function parseDir(count) { 
 
   /**
-   * 
+   * Встроенная функция
    * @param {MetadataObjectType} res 
    * @returns {Promise<null | Error>}
    */
@@ -52,6 +52,7 @@ async function parseDir(count) {
   }
 
   /**
+   * Встроенная функция
    * Функция создания одного массива файла
    * проходит по объекту метаданных для заполнения массива
    * @param {MetadataObjectType} dataObj
@@ -75,6 +76,7 @@ async function parseDir(count) {
   }
 
   /**
+   * Встроенная функция
    * Очищает расширение в строке
    * @param {string} fileTail 
    * @returns {string}
@@ -82,6 +84,8 @@ async function parseDir(count) {
   function clearExt(fileTail) {
     return fileTail.replace(/\.[A-Za-z0-9]*$/, '');
   }
+
+  // Начало глобальной логики
 
   let _count = count;
   const defRes = {
@@ -94,6 +98,7 @@ async function parseDir(count) {
     media: 'https://site.ru/images',
     copies: 1,
   };
+
   const files = await new Promise((resolve, reject) => {
     fs.readdir(DATA_PATH, (e, r) => {
       if (e) {
@@ -103,7 +108,6 @@ async function parseDir(count) {
       resolve(r);
     });
   });
-
   if (files.length < count) {
     _count = files.length;
   }
@@ -144,9 +148,13 @@ async function parseDir(count) {
     deleteFile(_result);
     result.push(_result);
   }
+  
   return result;
 }
 
+/**
+ * Старт скрипта
+ */
 (async () => {
   const result = await parseDir(5);
   if (result.length === 0) {
