@@ -30,26 +30,7 @@ const FILE_PREFIX = '_'; // Разбитель в названии файла
 
   }}
  */
-async function parseDir(count) {
-  const defRes = {
-    id: 0,
-    title: 'Image ',
-    name: '',
-    description: 'Static description',
-    type: 'image',
-    parameters: '',
-    media: 'https://site.ru/images',
-    copies: 1,
-  };
-  const files = await new Promise((resolve, reject) => {
-    fs.readdir(DATA_PATH, (e, r) => {
-      if (e) {
-        console.error(`Reading directory "${DATA_PATH}" error `);
-        reject(e);
-      }
-      resolve(r);
-    });
-  });
+async function parseDir(count) { 
 
   /**
    * 
@@ -102,9 +83,34 @@ async function parseDir(count) {
     return fileTail.replace(/\.[A-Za-z0-9]*$/, '');
   }
 
+  let _count = count;
+  const defRes = {
+    id: 0,
+    title: 'Image ',
+    name: '',
+    description: 'Static description',
+    type: 'image',
+    parameters: '',
+    media: 'https://site.ru/images',
+    copies: 1,
+  };
+  const files = await new Promise((resolve, reject) => {
+    fs.readdir(DATA_PATH, (e, r) => {
+      if (e) {
+        console.error(`Reading directory "${DATA_PATH}" error `);
+        reject(e);
+      }
+      resolve(r);
+    });
+  });
+
+  if (files.length < count) {
+    _count = files.length;
+  }
+
   const result = [];
   // проход по файлам папки
-  for (let i = 0; files[i] && i < count; i++) {
+  for (let i = 0; files[i] && i < _count; i++) {
     const oneFile = files[i];
     const fileTails = oneFile.split(FILE_PREFIX);
     const res = Object.assign({}, defRes);
