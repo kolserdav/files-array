@@ -68,7 +68,7 @@ async function parseDir(count) {
       const key = keys[i];
       switch(key) {
         case 'media':
-            resObj.media = `${dataObj.media}/${clearExt(name)}${EXTENSION}`;
+            resObj.media = `${dataObj.media}/${clearExt(name.split(FILE_PREFIX)[0])}${EXTENSION}`;
           break;
         default:
         
@@ -84,7 +84,7 @@ async function parseDir(count) {
    * @returns {string}
    */
   function clearExt(fileTail) {
-    return fileTail.replace(/\.[A-Za-z0-9]*$/, '');
+    return fileTail.replace(/\.[A-Za-z0-9\w]*$/, '');
   }
 
   // Начало глобальной логики
@@ -140,7 +140,9 @@ async function parseDir(count) {
           } else {
             param = `, ${clearExt(fileTail)}`
           }
-          res.parameters += param;
+          if (n !== 1) {
+            res.parameters += param;
+          }
       }
     }
     res.parameters = res.parameters.replace(/^, /, '');
