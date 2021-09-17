@@ -2,10 +2,12 @@ const fs = require('fs');
 const path = require('path');
 
 // Настройки
-const DATA_NAME = './data';
-const EXTENSION = '.jpeg';
-const DATA_PATH = path.resolve(__dirname, DATA_NAME); // Путь до папки с файлами
+const DATA_NAME = './data'; // релативный путь до папки с файлами 
+const EXTENSION = '.jpeg'; // добавляемое расширение
 const FILE_PREFIX = '_'; // Разбитель в названии файла
+
+// Константы
+const DATA_PATH = path.resolve(__dirname, DATA_NAME); // Путь до папки с файлами
 
 /**
  * Глобальная функция парсинга директории с выводом JSON строк объектов
@@ -148,7 +150,7 @@ async function parseDir(count) {
     deleteFile(_result);
     result.push(_result);
   }
-  
+
   return result;
 }
 
