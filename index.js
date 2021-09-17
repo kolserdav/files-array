@@ -6,7 +6,7 @@ const DATA_PATH = path.resolve(__dirname, './data'); // Путь до папки
 const FILE_PREFIX = '_'; // Разбитель в названии файла
 
 /**
- * Функция парсинга директории с выводом массива массивов
+ * Функция парсинга директории с выводом JSON строк объектов
  *  частей названия файлов в директории по количеству первых файлов
  *  переданному в аргументе
  * @param {number} count 
@@ -28,6 +28,7 @@ const FILE_PREFIX = '_'; // Разбитель в названии файла
  */
 async function parseDir(count) {
   const defRes = {
+    id: 0,
     title: 'Image ',
     description: 'Static description',
     type: 'image',
@@ -59,7 +60,7 @@ async function parseDir(count) {
       const key = keys[i];
       switch(key) {
         case 'media':
-            resObj.media = `${dataObj.media}/${keys[0]}.jpeg`;
+            resObj.media = `${dataObj.media}/${dataObj.id}.jpeg`;
           break;
         default:
         
@@ -81,7 +82,8 @@ async function parseDir(count) {
       switch (n) {
         case 0:
           // title
-          res.title = `${defRes.title} ${fileTail}`;
+          res.id = parseInt(fileTail, 10);
+          res.title = `${defRes.title} ${res.id}`;
           break;
         case 1:
           // type

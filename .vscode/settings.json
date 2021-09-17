@@ -1,0 +1,11 @@
+{
+  "sshfs.configs": [
+    {
+        "name": "hetzner",
+        "putty": "Hetzner",
+        "label": "Hetzner",
+        "hop": "hetzner2",
+        "root": "/root"
+    }
+  ],
+}
