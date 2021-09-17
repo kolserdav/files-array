@@ -69,6 +69,15 @@ async function parseDir(count) {
     return JSON.stringify(resObj);
   }
 
+  /**
+   * Очищает расширение в строке
+   * @param {string} fileTail 
+   * @returns {string}
+   */
+  function clearExt(fileTail) {
+    return fileTail.replace(/\.[A-Za-z0-9]*$/, '');
+  }
+
   const result = [];
   // проход по файлам папки
   for (let i = 0; files[i] && i < count; i++) {
@@ -90,7 +99,13 @@ async function parseDir(count) {
           res.type = fileTail;
           break;
         default:
-          res.parameters += `, ${fileTail}`;
+          let param = '';
+          if (!fileTails[i + 1]) {
+            param = `, ${fileTail}`;
+          } else {
+            param = `, ${clearExt(fileTail)}`
+          }
+          res.parameters += param;
       }
     }
     res.parameters = res.parameters.replace(/^, /, '');
