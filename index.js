@@ -18,8 +18,6 @@ const DATA_PATH = path.resolve(__dirname, DATA_NAME); // Путь до папк�
 
       title: "Image 1", // 1 - цифра картинки
 
-      name: "" - исходное имя на сервере
-
       description: "Static description", // тут все всегда статично, без изменений
 
       type: "image". // тут всегда подставляется второй элемент из названия картинки 
@@ -36,13 +34,14 @@ async function parseDir(count) {
 
   /**
    * Встроенная функция
-   * @param {MetadataObjectType} res 
+   * @param {MetadataObjectType} res
+   * @param {string} name 
    * @returns {Promise<null | Error>}
    */
-  function deleteFile(res) {
+  function deleteFile(res, name) {
     return new Promise((resolve, reject) => {
       const reg = res.media.replace(new RegExp(`${defRes.media}/`), '');
-      const filePath = path.resolve(__dirname, `${DATA_NAME}/${res.name}`);
+      const filePath = path.resolve(__dirname, `${DATA_NAME}/${name}`);
       fs.unlink(filePath, (err) => {
         if (err) {
           console.error('Error delete files ', err.message);
@@ -58,17 +57,18 @@ async function parseDir(count) {
    * Функция создания одного массива файла
    * проходит по объекту метаданных для заполнения массива
    * @param {MetadataObjectType} dataObj
+   * @param {string} name 
    * @returns {[JSONString<MetadataObjectType>]} 
    */
   
-  function createFileArray(dataObj) {
+  function createFileArray(dataObj, name) {
     const keys = Object.keys(dataObj);
     const resObj = Object.assign({}, dataObj);
     for (let i = 0; keys[i]; i++) {
       const key = keys[i];
       switch(key) {
         case 'media':
-            resObj.media = `${dataObj.media}/${clearExt(dataObj.name.split(FILE_PREFIX)[0])}${EXTENSION}`;
+            resObj.media = `${dataObj.media}/${clearExt(name)}${EXTENSION}`;
           break;
         default:
         
@@ -93,7 +93,6 @@ async function parseDir(count) {
   const defRes = {
     id: 0,
     title: 'Image ',
-    name: '',
     description: 'Static description',
     type: 'image',
     parameters: '',
@@ -145,9 +144,9 @@ async function parseDir(count) {
       }
     }
     res.parameters = res.parameters.replace(/^, /, '');
-    res.name = oneFile.replace(EXTENSION, '');
-    const _result = createFileArray(res);
-    deleteFile(_result);
+    const fileName = oneFile.replace(EXTENSION, '');
+    const _result = createFileArray(res, fileName);
+    deleteFile(_result, fileName);
     result.push(_result);
   }
 
