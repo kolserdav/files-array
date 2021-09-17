@@ -2,7 +2,9 @@ const fs = require('fs');
 const path = require('path');
 
 // Настройки
-const DATA_PATH = path.resolve(__dirname, './data'); // Путь до папки с файлами
+const DATA_NAME = './data';
+const EXTENSION = '.jpeg';
+const DATA_PATH = path.resolve(__dirname, DATA_NAME); // Путь до папки с файлами
 const FILE_PREFIX = '_'; // Разбитель в названии файла
 
 /**
@@ -13,6 +15,8 @@ const FILE_PREFIX = '_'; // Разбитель в названии файла
  * @returns {Promise<MetadataObjectType>{
 
       title: "Image 1", // 1 - цифра картинки
+
+      name: "" - исходное имя на сервере
 
       description: "Static description", // тут все всегда статично, без изменений
 
@@ -30,6 +34,7 @@ async function parseDir(count) {
   const defRes = {
     id: 0,
     title: 'Image ',
+    name: '',
     description: 'Static description',
     type: 'image',
     parameters: '',
@@ -47,6 +52,26 @@ async function parseDir(count) {
   });
 
   /**
+   * 
+   * @param {MetadataObjectType} res 
+   * @returns {Promise<null | Error>}
+   */
+  function deleteFile(res) {
+    return new Promise((resolve, reject) => {
+      const reg = res.media.replace(new RegExp(`${defRes.media}/`), '');
+      const filePath = path.resolve(__dirname, `${DATA_NAME}/${res.name}`);
+      console.log(reg, 22)
+      fs.unlink(filePath, (err) => {
+        if (err) {
+          console.error('Error delete files ', err.message);
+          reject(err);
+        }
+        resolve(null);
+      });
+    });
+  }
+
+  /**
    * Функция создания одного массива файла
    * проходит по объекту метаданных для заполнения массива
    * @param {MetadataObjectType} dataObj
@@ -60,13 +85,13 @@ async function parseDir(count) {
       const key = keys[i];
       switch(key) {
         case 'media':
-            resObj.media = `${dataObj.media}/${dataObj.id}.jpeg`;
+            resObj.media = `${dataObj.media}/${clearExt(dataObj.name)}${EXTENSION}`;
           break;
         default:
         
       }
     }
-    return JSON.stringify(resObj);
+    return resObj;
   }
 
   /**
@@ -109,12 +134,18 @@ async function parseDir(count) {
       }
     }
     res.parameters = res.parameters.replace(/^, /, '');
-    result.push(createFileArray(res));
+    res.name = oneFile.replace(EXTENSION, '');
+    const _result = createFileArray(res);
+    deleteFile(_result);
+    result.push(_result);
   }
   return result;
 }
 
 (async () => {
-  const result = await parseDir(3);
+  const result = await parseDir(5);
+  if (result.length === 0) {
+    console.warn(`Files not found in ${DATA_PATH}`);
+  }
   console.log(result);
 })()
