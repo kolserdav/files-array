@@ -27,15 +27,9 @@ const DEFAULT_METADATA_OBJECT = {
 
 // Константы
 const DATA_PATH = path.resolve(__dirname, DATA_NAME); // Путь до папки с файлами
-const {
-  FIREBASE_PROJECT_ID,
-  FIRESTORE_COLLECTION_NAME,
-  FIREBASE_PROJECT_USER_EMAIL,
-  FIREBASE_PROJECT_USER_PASSWORD,
-} = process.env;
+const { FIREBASE_PROJECT_ID, FIRESTORE_COLLECTION_NAME } = process.env;
 const DATABASE_CONFIG = {
   projectId: serviceAccount.project_id,
-  credential: admin.credential.cert(serviceAccount),
   databaseURL: `https://${FIREBASE_PROJECT_ID}.firebaseio.com`,
 };
 // Автоматические настройки
@@ -74,28 +68,6 @@ async function database() {
    */
   const app = initializeApp(DATABASE_CONFIG);
 
-  /**
-   * Получает токен админа firebase
-   * по id клиента из файла .firebase-auth/credentials
-   * @returns
-   */
-  function getToken() {
-    return new Promise((resolve, reject) => {
-      admin
-        .auth()
-        .createCustomToken(serviceAccount.client_id)
-        .then((d) => {
-          resolve(d);
-        })
-        .catch((err) => {
-          console.error('Error authentication firebase', err.code, err.message);
-          reject(err);
-        });
-    });
-  }
-
-  const token = await getToken();
-  app.options.token = token;
   const database = getFirestore(app);
   const colDb = collection(
     database,
