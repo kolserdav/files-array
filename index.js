@@ -1,11 +1,14 @@
 const fs = require('fs');
 const path = require('path');
 const dotenv = require('dotenv');
+const admin = require('firebase-admin');
 const { initializeApp } = require('firebase/app');
-const { getAuth, signInWithEmailAndPassword } = require('firebase/auth');
+const { getAuth, signInWithCustomToken } = require('firebase/auth');
 const { getFirestore, collection, getDocs, addDoc } = require('firebase/firestore/lite');
 
-// Автоматические настройки
+const serviceAccount = require('./.firebase-auth/.credentials.json');
+
+// Настройка окружения
 dotenv.config();
 
 // Настройки
@@ -30,6 +33,13 @@ const {
   FIREBASE_PROJECT_USER_EMAIL,
   FIREBASE_PROJECT_USER_PASSWORD,
 } = process.env;
+const DATABASE_CONFIG = {
+  projectId: serviceAccount.project_id,
+  credential: admin.credential.cert(serviceAccount),
+  databaseURL: `https://${FIREBASE_PROJECT_ID}.firebaseio.com`,
+};
+// Автоматические настройки
+admin.initializeApp(DATABASE_CONFIG);
 
 /**
  * Глобальные функции
@@ -58,30 +68,40 @@ const {
  *  addToDb: async function (doc: MetadataObjectType[] | MetadataObjectType): DocumentReference
  * }
  */
-function database() {
-  const firebaseConfig = {
-    projectId: FIREBASE_PROJECT_ID,
-  };
+async function database() {
+  /**
+   * Инициализирует админ сессию приложения
+   */
+  const app = initializeApp(DATABASE_CONFIG);
 
-  const app = initializeApp(firebaseConfig);
+  /**
+   * Получает токен админа firebase
+   * по id клиента из файла .firebase-auth/credentials
+   * @returns
+   */
+  function getToken() {
+    return new Promise((resolve, reject) => {
+      admin
+        .auth()
+        .createCustomToken(serviceAccount.client_id)
+        .then((d) => {
+          resolve(d);
+        })
+        .catch((err) => {
+          console.error('Error authentication firebase', err.code, err.message);
+          reject(err);
+        });
+    });
+  }
+
+  const token = await getToken();
+  app.options.token = token;
   const database = getFirestore(app);
-  const auth = new getAuth();
-  const user = new Promise((resolve, reject) => {
-    signInWithEmailAndPassword(auth, FIREBASE_PROJECT_USER_EMAIL, FIREBASE_PROJECT_USER_PASSWORD)
-      .then((userCredential) => {
-        // Успешный вход
-        resolve(userCredential.user);
-      })
-      .catch((error) => {
-        console.error(
-          'Error sing in with email and password of firebase project user',
-          error.code,
-          error.message
-        );
-        reject(error);
-      });
-  });
-  const colDb = collection(database, FIRESTORE_COLLECTION_NAME);
+  const colDb = collection(
+    database,
+    FIRESTORE_COLLECTION_NAME,
+    `/users/${serviceAccount.client_id}`
+  );
 
   /**
    * Получение списка из базы данных
@@ -108,7 +128,7 @@ function database() {
 }
 //
 (async () => {
-  const db = database();
+  const db = await database();
   const list = await db.addToDb(DEFAULT_METADATA_OBJECT);
   console.log(list);
 })();
