@@ -1,12 +1,16 @@
 const fs = require('fs');
 const path = require('path');
 const dotenv = require('dotenv');
-const admin = require('firebase-admin');
 const { initializeApp } = require('firebase/app');
-const { getAuth, signInWithCustomToken } = require('firebase/auth');
-const { getFirestore, collection, getDocs, addDoc } = require('firebase/firestore/lite');
-
-const serviceAccount = require('./.firebase-auth/.credentials.json');
+const {
+  getFirestore,
+  collection,
+  getDocs,
+  addDoc,
+  deleteDoc,
+  getDoc,
+  refEqual,
+} = require('firebase/firestore/lite');
 
 // Настройка окружения
 dotenv.config();
@@ -29,11 +33,9 @@ const DEFAULT_METADATA_OBJECT = {
 const DATA_PATH = path.resolve(__dirname, DATA_NAME); // Путь до папки с файлами
 const { FIREBASE_PROJECT_ID, FIRESTORE_COLLECTION_NAME } = process.env;
 const DATABASE_CONFIG = {
-  projectId: serviceAccount.project_id,
+  projectId: FIREBASE_PROJECT_ID,
   databaseURL: `https://${FIREBASE_PROJECT_ID}.firebaseio.com`,
 };
-// Автоматические настройки
-admin.initializeApp(DATABASE_CONFIG);
 
 /**
  * Глобальные функции
@@ -68,12 +70,8 @@ async function database() {
    */
   const app = initializeApp(DATABASE_CONFIG);
 
-  const database = getFirestore(app);
-  const colDb = collection(
-    database,
-    FIRESTORE_COLLECTION_NAME,
-    `/users/${serviceAccount.client_id}`
-  );
+  const db = getFirestore(app);
+  const colDb = collection(db, FIRESTORE_COLLECTION_NAME);
 
   /**
    * Получение списка из базы данных
@@ -82,7 +80,13 @@ async function database() {
    */
   async function getFromDb(count) {
     console.log(count);
-    const snapShot = await getDocs(colDb, 3);
+    // TODOO
+    const newCol = collection(db, FIRESTORE_COLLECTION_NAME).withConverter({});
+    const snapShot = await getDocs(newCol, 3);
+    snapShot._docs.map(async (sDoc) => {
+      const f = await getDoc(sDoc);
+      console.log(1, f);
+    });
     const list = snapShot.docs.map((doc) => doc.data());
     return list;
   }
@@ -98,12 +102,6 @@ async function database() {
 
   return { getFromDb, addToDb };
 }
-//
-(async () => {
-  const db = await database();
-  const list = await db.addToDb(DEFAULT_METADATA_OBJECT);
-  console.log(list);
-})();
 
 /**
  * Глобальная функция парсинга директории с выводом JSON строк объектов
@@ -238,5 +236,22 @@ async function parseDir(count) {
   if (result.length === 0) {
     console.warn(`Files not found in ${DATA_PATH}`);
   }
-  console.log(result);
+  const db = await database();
+  let success = 0;
+  const origins = await db.getFromDb();
+  origins.map(async (origin) => {
+    console.log(origin);
+    const doc = await getDoc(origin);
+    console.log(doc);
+  });
+  result.map(async (oneObj) => {
+    const res = await db.addToDb(oneObj);
+    if (!res) {
+      console.warn(`Add to db result is ${res}`);
+    } else {
+      success++;
+      console.info(`Success packs: ${success} from ${result.length}`);
+    }
+    console.info('Result ', result);
+  });
 })();
