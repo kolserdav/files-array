@@ -1,6 +1,7 @@
 import 'regenerator-runtime/runtime';
+const { initializeApp } = require('firebase/app');
+const { getFirestore, collection, getDocs, deleteDoc, doc } = require('firebase/firestore');
 import { initContract, login, logout } from './utils';
-import { database } from '../../utils';
 
 const firebaseConfig = getConfig('firebase');
 const { FIRESTORE_DATABASE_NAME, FIRESTORE_COLLECTION_NAME } = firebaseConfig;
@@ -9,14 +10,43 @@ import getConfig from './config';
 const { networkId } = getConfig(process.env.NODE_ENV || 'development');
 
 /**
+ * Настройки подключения к базе данных
+ */
+const databaseConfig = {
+  projectId: FIRESTORE_DATABASE_NAME,
+  databaseURL: `https://${FIRESTORE_DATABASE_NAME}.firebaseio.com`,
+};
+const app = initializeApp(databaseConfig);
+
+const db = getFirestore(app);
+
+/**
+ * Получение списка из базы данных
+ * @param {number} count
+ * @returns {MetadataObjectType[]}
+ */
+async function getFromDb(count) {
+  const newCol = collection(db, FIRESTORE_COLLECTION_NAME);
+  const snapShot = await getDocs(newCol);
+  let result = [];
+  console.log(snapShot.docs.length);
+  for (let i = 0; snapShot.docs[i] && i < count; i++) {
+    const item = snapShot.docs[i];
+    const id = item._document.key.path.segments[6];
+    result.push(item.data());
+    deleteDoc(doc(db, FIRESTORE_COLLECTION_NAME, id));
+  }
+  return result;
+}
+
+/**
  * Обработка нажания на кнопу Получить
  */
 const button = document.querySelector('#send');
 const input = document.querySelector('#count');
 button.addEventListener('click', async () => {
-  const db = await database(FIRESTORE_DATABASE_NAME, FIRESTORE_COLLECTION_NAME);
   const count = parseInt(input.value, 10);
-  const d = await db.getFromDb(isNaN(count) ? 0 : count);
+  const d = await getFromDb(isNaN(count) ? 0 : count);
   // Результат выводит в консоль
   console.log(d);
 });

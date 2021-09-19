@@ -1,12 +1,11 @@
 const fs = require('fs');
 const path = require('path');
 const dotenv = require('dotenv');
+const { initializeApp } = require('firebase/app');
+const { getFirestore, collection, addDoc } = require('firebase/firestore');
 
 // Настройка окружения
 dotenv.config();
-
-// подключение доп файлов
-const { database } = require('./utils');
 
 // Настройки
 const DATA_NAME = './data'; // релативный путь до папки с файлами
@@ -28,6 +27,16 @@ const { FIRESTORE_DATABASE_NAME, FIRESTORE_COLLECTION_NAME } = process.env;
 if (!FIRESTORE_DATABASE_NAME || !FIRESTORE_DATABASE_NAME) {
   console.error('File .env not specified, see .env.example');
 }
+
+// Подключение к базе данных
+const databaseConfig = {
+  projectId: FIRESTORE_DATABASE_NAME,
+  databaseURL: `https://${FIRESTORE_DATABASE_NAME}.firebaseio.com`,
+};
+const app = initializeApp(databaseConfig);
+
+const db = getFirestore(app);
+const colDb = collection(db, FIRESTORE_COLLECTION_NAME);
 
 /**
  * Глобальные функции
@@ -182,24 +191,42 @@ async function parseDir(count) {
 }
 
 /**
+ * Служебные функции
+ */
+
+/**
+ *
+ * @param {MetadataObjectType[] | MetadataObjectType} doc
+ * @returns {DocumentReference}
+ */
+async function addToDb(doc) {
+  return await addDoc(colDb, doc);
+}
+
+/**
  * Старт
  */
 (async () => {
-  const result = await parseDir(5);
+  const arg = process.argv[2];
+  const argNum = parseInt(arg);
+  if (isNaN(argNum)) {
+    console.warn(`Third argument must be a number received ${arg}`);
+    return;
+  }
+  const result = await parseDir();
   if (result.length === 0) {
     console.warn(`Files not found in ${DATA_PATH}`);
   }
-  const db = await database(FIRESTORE_DATABASE_NAME, FIRESTORE_COLLECTION_NAME);
   let success = 0;
   result.map(async (oneObj) => {
-    const res = await db.addToDb(oneObj);
+    const res = await addToDb(oneObj);
+    console.info('Results: ', result);
     if (!res) {
       console.warn(`Add to db result is ${res}`);
     } else {
       success++;
       console.info(`Success packs: ${success} from ${result.length}`);
     }
-    console.info('Results: ', result);
     process.exit(0);
   });
 })();
