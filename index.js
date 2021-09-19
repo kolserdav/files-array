@@ -186,6 +186,10 @@ async function parseDir(count) {
   // проход по файлам папки
   for (let i = 0; files[i] && i < _count; i++) {
     const oneFile = files[i];
+    // если наименование файла не соответствует, то он пропускается
+    if (!oneFile.match(/^\d+_/)) {
+      continue;
+    }
     const fileTails = oneFile.split(FILE_PREFIX);
     const res = Object.assign({}, DEFAULT_METADATA_OBJECT);
     res.parameters = '';
