@@ -3,7 +3,7 @@ import { initContract, login, logout } from './utils';
 import { database } from '../../utils';
 
 const firebaseConfig = getConfig('firebase');
-const { FIREBASE_PROJECT_ID, FIRESTORE_COLLECTION_NAME } = firebaseConfig;
+const { FIRESTORE_DATABASE_NAME, FIRESTORE_COLLECTION_NAME } = firebaseConfig;
 
 import getConfig from './config';
 const { networkId } = getConfig(process.env.NODE_ENV || 'development');
@@ -14,7 +14,7 @@ const { networkId } = getConfig(process.env.NODE_ENV || 'development');
 const button = document.querySelector('#send');
 const input = document.querySelector('#count');
 button.addEventListener('click', async () => {
-  const db = await database(FIREBASE_PROJECT_ID, FIRESTORE_COLLECTION_NAME);
+  const db = await database(FIRESTORE_DATABASE_NAME, FIRESTORE_COLLECTION_NAME);
   const count = parseInt(input.value, 10);
   const d = await db.getFromDb(isNaN(count) ? 0 : count);
   console.log(d);

@@ -24,8 +24,8 @@ const DEFAULT_METADATA_OBJECT = {
 
 // Константы
 const DATA_PATH = path.resolve(__dirname, DATA_NAME); // Путь до папки с файлами
-const { FIREBASE_PROJECT_ID, FIRESTORE_COLLECTION_NAME } = process.env;
-if (!FIREBASE_PROJECT_ID || !FIREBASE_PROJECT_ID) {
+const { FIRESTORE_DATABASE_NAME, FIRESTORE_COLLECTION_NAME } = process.env;
+if (!FIRESTORE_DATABASE_NAME || !FIRESTORE_DATABASE_NAME) {
   console.error('File .env not specified, see .env.example');
 }
 
@@ -170,6 +170,7 @@ async function parseDir(count) {
      * удаление файла и возврат результата
      */
     res.parameters = res.parameters.replace(/^, /, '');
+    res.parameters = res.parameters.replace(/\.[a-zA-Z]/, '');
     const fileName = oneFile.replace(EXTENSION, '');
     const _result = changeOneField(res, fileName);
     if (_result) {
@@ -188,7 +189,7 @@ async function parseDir(count) {
   if (result.length === 0) {
     console.warn(`Files not found in ${DATA_PATH}`);
   }
-  const db = await database(FIREBASE_PROJECT_ID, FIRESTORE_COLLECTION_NAME);
+  const db = await database(FIRESTORE_DATABASE_NAME, FIRESTORE_COLLECTION_NAME);
   let success = 0;
   result.map(async (oneObj) => {
     const res = await db.addToDb(oneObj);
@@ -199,5 +200,6 @@ async function parseDir(count) {
       console.info(`Success packs: ${success} from ${result.length}`);
     }
     console.info('Results: ', result);
+    process.exit(0);
   });
 })();
