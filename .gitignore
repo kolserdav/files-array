@@ -2,3 +2,7 @@ node_modules
 data/*
 !data/.gitkeep
 .env
+.firebase
+app/dist
+app/.cache
+app/contract/target

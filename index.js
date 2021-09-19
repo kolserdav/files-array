@@ -1,19 +1,12 @@
 const fs = require('fs');
 const path = require('path');
 const dotenv = require('dotenv');
-const { initializeApp } = require('firebase/app');
-const {
-  getFirestore,
-  collection,
-  getDocs,
-  addDoc,
-  deleteDoc,
-  getDoc,
-  refEqual,
-} = require('firebase/firestore/lite');
 
 // Настройка окружения
 dotenv.config();
+
+// подключение доп файлов
+const { database } = require('./utils');
 
 // Настройки
 const DATA_NAME = './data'; // релативный путь до папки с файлами
@@ -32,10 +25,6 @@ const DEFAULT_METADATA_OBJECT = {
 // Константы
 const DATA_PATH = path.resolve(__dirname, DATA_NAME); // Путь до папки с файлами
 const { FIREBASE_PROJECT_ID, FIRESTORE_COLLECTION_NAME } = process.env;
-const DATABASE_CONFIG = {
-  projectId: FIREBASE_PROJECT_ID,
-  databaseURL: `https://${FIREBASE_PROJECT_ID}.firebaseio.com`,
-};
 
 /**
  * Глобальные функции
@@ -56,52 +45,6 @@ const DATABASE_CONFIG = {
   };
  * @returns
  */
-
-/**
- * @param {void}
- * @returns {
- *  getFromDb: async function (count: number ): MetadataObjectType[]
- *  addToDb: async function (doc: MetadataObjectType[] | MetadataObjectType): DocumentReference
- * }
- */
-async function database() {
-  /**
-   * Инициализирует админ сессию приложения
-   */
-  const app = initializeApp(DATABASE_CONFIG);
-
-  const db = getFirestore(app);
-  const colDb = collection(db, FIRESTORE_COLLECTION_NAME);
-
-  /**
-   * Получение списка из базы данных
-   * @param {number} count
-   * @returns {MetadataObjectType[]}
-   */
-  async function getFromDb(count) {
-    console.log(count);
-    // TODOO
-    const newCol = collection(db, FIRESTORE_COLLECTION_NAME).withConverter({});
-    const snapShot = await getDocs(newCol, 3);
-    snapShot._docs.map(async (sDoc) => {
-      const f = await getDoc(sDoc);
-      console.log(1, f);
-    });
-    const list = snapShot.docs.map((doc) => doc.data());
-    return list;
-  }
-
-  /**
-   *
-   * @param {MetadataObjectType[] | MetadataObjectType} doc
-   * @returns {DocumentReference}
-   */
-  async function addToDb(doc) {
-    return await addDoc(colDb, doc);
-  }
-
-  return { getFromDb, addToDb };
-}
 
 /**
  * Глобальная функция парсинга директории с выводом JSON строк объектов
@@ -240,7 +183,7 @@ async function parseDir(count) {
   if (result.length === 0) {
     console.warn(`Files not found in ${DATA_PATH}`);
   }
-  const db = await database();
+  const db = await database(FIREBASE_PROJECT_ID, FIRESTORE_COLLECTION_NAME);
   let success = 0;
   result.map(async (oneObj) => {
     const res = await db.addToDb(oneObj);
