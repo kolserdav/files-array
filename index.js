@@ -222,7 +222,6 @@ async function addToDb(doc) {
   let success = 0;
   result.map(async (oneObj, index) => {
     const res = await addToDb(oneObj);
-    console.info('Results: ', result, typeof res);
     if (!res) {
       console.warn(`Add to db result is ${res}`);
     } else {
