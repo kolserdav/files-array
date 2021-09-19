@@ -208,12 +208,12 @@ async function addToDb(doc) {
  */
 (async () => {
   const arg = process.argv[2];
-  const argNum = parseInt(arg);
+  const argNum = parseInt(arg, 10);
   if (isNaN(argNum)) {
     console.warn(`Third argument must be a number received ${arg}`);
     return;
   }
-  const result = await parseDir();
+  const result = await parseDir(argNum);
   if (result.length === 0) {
     console.warn(`Files not found in ${DATA_PATH}`);
   }
