@@ -238,12 +238,6 @@ async function parseDir(count) {
   }
   const db = await database();
   let success = 0;
-  const origins = await db.getFromDb();
-  origins.map(async (origin) => {
-    console.log(origin);
-    const doc = await getDoc(origin);
-    console.log(doc);
-  });
   result.map(async (oneObj) => {
     const res = await db.addToDb(oneObj);
     if (!res) {
