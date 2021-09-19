@@ -3,6 +3,7 @@
 ## Ссылки
 
 - Список изменений по версиям [docs/CHANGELOG.md](docs/CHANGELOG.md)
+- Инструкция разработчика [docs/CONTRIBUTING.md](docs/CONTRIBUTING.md)
 
 ## Требования
 

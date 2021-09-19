@@ -7,4 +7,3 @@ app/dist
 app/.cache
 app/contract/target
 firebase-debug.log
-docs/CONTRIBUTING.md
