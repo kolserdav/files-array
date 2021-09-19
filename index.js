@@ -172,7 +172,9 @@ async function parseDir(count) {
     res.parameters = res.parameters.replace(/^, /, '');
     const fileName = oneFile.replace(EXTENSION, '');
     const _result = changeOneField(res, fileName);
-    deleteFile(_result, fileName);
+    if (_result) {
+      deleteFile(_result, fileName);
+    }
     result.push(_result);
   }
   return result;
@@ -196,6 +198,6 @@ async function parseDir(count) {
       success++;
       console.info(`Success packs: ${success} from ${result.length}`);
     }
-    console.info('Result ', result);
+    console.info('Results: ', result);
   });
 })();
