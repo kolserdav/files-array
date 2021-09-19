@@ -67,7 +67,7 @@ function getConfig(env) {
       };
     case 'firebase':
       return {
-        FIREBASE_PROJECT_ID: 'database-e4a34',
+        FIRESTORE_DATABASE_NAME: 'database-e4a34',
         FIRESTORE_COLLECTION_NAME: 'metadata',
       };
     default:

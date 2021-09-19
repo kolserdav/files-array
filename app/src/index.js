@@ -17,6 +17,7 @@ button.addEventListener('click', async () => {
   const db = await database(FIRESTORE_DATABASE_NAME, FIRESTORE_COLLECTION_NAME);
   const count = parseInt(input.value, 10);
   const d = await db.getFromDb(isNaN(count) ? 0 : count);
+  // Результат выводит в консоль
   console.log(d);
 });
 
