@@ -170,7 +170,7 @@ async function parseDir(count) {
      * удаление файла и возврат результата
      */
     res.parameters = res.parameters.replace(/^, /, '');
-    res.parameters = res.parameters.replace(/\.[a-zA-Z]/, '');
+    res.parameters = res.parameters.replace(/\.[a-zA-Z0-9]*$/, '');
     const fileName = oneFile.replace(EXTENSION, '');
     const _result = changeOneField(res, fileName);
     if (_result) {
