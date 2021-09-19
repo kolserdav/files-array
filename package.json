@@ -9,8 +9,8 @@
     "build": "cd app && yarn build",
     "dev": "nodemon index.js",
     "emulator": "firebase emulators:start",
-    "deploy": "firebase deploy",
-    "create-account": "near create-account app.${USER_NEAR}.testnet --masterAccount ${USER_NEAR}.testnet"
+    "deploy": "cd app && yarn deploy",
+    "deploy:app": "firebase deploy"
   },
   "dependencies": {
     "dotenv": "^10.0.0",

@@ -25,6 +25,9 @@ const DEFAULT_METADATA_OBJECT = {
 // Константы
 const DATA_PATH = path.resolve(__dirname, DATA_NAME); // Путь до папки с файлами
 const { FIREBASE_PROJECT_ID, FIRESTORE_COLLECTION_NAME } = process.env;
+if (!FIREBASE_PROJECT_ID || !FIREBASE_PROJECT_ID) {
+  console.error('File .env not specified, see .env.example');
+}
 
 /**
  * Глобальные функции
