@@ -28,15 +28,17 @@ const db = getFirestore(app);
 async function getFromDb(count) {
   const newCol = collection(db, FIRESTORE_COLLECTION_NAME);
   const snapShot = await getDocs(newCol);
-  let result = [];
-  console.log(snapShot.docs.length);
+  const result = [];
+  const array = [];
   for (let i = 0; snapShot.docs[i] && i < count; i++) {
     const item = snapShot.docs[i];
     const id = item._document.key.path.segments[6];
-    result.push(item.data());
+    const data = item.data();
+    array.push(data.id);
+    result.push(data);
     deleteDoc(doc(db, FIRESTORE_COLLECTION_NAME, id));
   }
-  return result;
+  return { result, array };
 }
 
 /**
@@ -46,9 +48,9 @@ const button = document.querySelector('#send');
 const input = document.querySelector('#count');
 button.addEventListener('click', async () => {
   const count = parseInt(input.value, 10);
-  const d = await getFromDb(isNaN(count) ? 0 : count);
+  const { result, array } = await getFromDb(isNaN(count) ? 0 : count);
   // Результат выводит в консоль
-  console.log(d);
+  console.log('LOG: ', result, array);
 });
 
 // global variable used throughout
