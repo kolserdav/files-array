@@ -200,7 +200,9 @@ async function parseDir(count) {
  * @returns {DocumentReference}
  */
 async function addToDb(doc) {
-  return await addDoc(colDb, doc);
+  return await addDoc(colDb, doc).catch((e) => {
+    console.log(1, e);
+  });
 }
 
 /**
@@ -218,15 +220,17 @@ async function addToDb(doc) {
     console.warn(`Files not found in ${DATA_PATH}`);
   }
   let success = 0;
-  result.map(async (oneObj) => {
+  result.map(async (oneObj, index) => {
     const res = await addToDb(oneObj);
-    console.info('Results: ', result);
+    console.info('Results: ', result, typeof res);
     if (!res) {
       console.warn(`Add to db result is ${res}`);
     } else {
       success++;
       console.info(`Success packs: ${success} from ${result.length}`);
+      if (!result[index + 1]) {
+        process.exit(0);
+      }
     }
-    process.exit(0);
   });
 })();
