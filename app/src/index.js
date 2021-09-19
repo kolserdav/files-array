@@ -15,7 +15,8 @@ const button = document.querySelector('#send');
 const input = document.querySelector('#count');
 button.addEventListener('click', async () => {
   const db = await database(FIREBASE_PROJECT_ID, FIRESTORE_COLLECTION_NAME);
-  const d = await db.getFromDb(3);
+  const count = parseInt(input.value, 10);
+  const d = await db.getFromDb(isNaN(count) ? 0 : count);
   console.log(d);
 });
 

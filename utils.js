@@ -4,10 +4,11 @@ const {
   collection,
   getDocs,
   addDoc,
+  doc,
   deleteDoc,
   getDoc,
   refEqual,
-} = require('firebase/firestore/lite');
+} = require('firebase/firestore');
 
 /**
  * @param {void}
@@ -35,12 +36,16 @@ async function database(projectId, collectionName) {
    * @returns {MetadataObjectType[]}
    */
   async function getFromDb(count) {
-    console.log(count);
-    // TODOO
     const newCol = collection(db, collectionName);
     const snapShot = await getDocs(newCol);
-    const list = snapShot.docs.map((doc) => doc.data());
-    return list;
+    let result = [];
+    for (let i = 0; snapShot.docs[i] && i < count; i++) {
+      const item = snapShot.docs[i];
+      const id = item._document.key.path.segments[6];
+      result.push(item.data());
+      deleteDoc(doc(db, collectionName, id));
+    }
+    return result;
   }
 
   /**
