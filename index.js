@@ -139,7 +139,7 @@ async function parseDir(count) {
 
   const result = [];
   // проход по файлам папки
-  for (let i = 0; files[i] && i < _count; i++) {
+  for (let i = 0; files[i] && i <= _count; i++) {
     const oneFile = files[i];
     // если наименование файла не соответствует, то он пропускается
     if (!oneFile.match(/^\d+_/)) {
