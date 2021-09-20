@@ -7,3 +7,4 @@ app/dist
 app/.cache
 app/contract/target
 firebase-debug.log
+firestore-debug.log
