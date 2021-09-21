@@ -12,7 +12,6 @@ const DATA_NAME = './data'; // релативный путь до папки с 
 const EXTENSION = '.jpeg'; // добавляемое расширение
 const FILE_PREFIX = '_'; // Разбитель в названии файла
 const DEFAULT_METADATA_OBJECT = {
-  id: 0,
   title: 'Image ',
   description: 'Static description',
   type: 'image',
@@ -155,8 +154,7 @@ async function parseDir(count) {
       switch (n) {
         case 0:
           // title
-          res.id = parseInt(fileTail, 10);
-          res.title = `${DEFAULT_METADATA_OBJECT.title} ${res.id}`;
+          res.title = `${DEFAULT_METADATA_OBJECT.title} ${parseInt(fileTail, 10)}`;
           break;
         case 1:
           // type
