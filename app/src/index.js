@@ -1,6 +1,15 @@
 import 'regenerator-runtime/runtime';
 const { initializeApp } = require('firebase/app');
-const { getFirestore, collection, getDocs, deleteDoc, doc } = require('firebase/firestore');
+const {
+  getFirestore,
+  collection,
+  getDocs,
+  deleteDoc,
+  doc,
+  query,
+  where,
+  limit,
+} = require('firebase/firestore');
 import { initContract, login, logout } from './utils';
 
 const firebaseConfig = getConfig('firebase');
@@ -27,10 +36,11 @@ const db = getFirestore(app);
  */
 async function getFromDb(count) {
   const newCol = collection(db, FIRESTORE_COLLECTION_NAME);
-  const snapShot = await getDocs(newCol);
+  const q = query(newCol, limit(count));
+  const snapShot = await getDocs(q);
   const result = [];
   const array = [];
-  for (let i = 0; snapShot.docs[i] && i < count; i++) {
+  for (let i = 0; snapShot.docs[i]; i++) {
     const item = snapShot.docs[i];
     const id = item._document.key.path.segments[6];
     const data = item.data();
