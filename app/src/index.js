@@ -1,67 +1,108 @@
+//@ts-check
 import 'regenerator-runtime/runtime';
-const { initializeApp } = require('firebase/app');
-const {
-  getFirestore,
-  collection,
-  getDocs,
-  deleteDoc,
-  doc,
-  query,
-  where,
-  limit,
-} = require('firebase/firestore');
 import { initContract, login, logout } from './utils';
 
-const firebaseConfig = getConfig('firebase');
-const { FIRESTORE_DATABASE_NAME, FIRESTORE_COLLECTION_NAME } = firebaseConfig;
 
 import getConfig from './config';
 const { networkId } = getConfig(process.env.NODE_ENV || 'development');
 
-/**
- * Настройки подключения к базе данных
- */
-const databaseConfig = {
-  projectId: FIRESTORE_DATABASE_NAME,
-  databaseURL: `https://${FIRESTORE_DATABASE_NAME}.firebaseio.com`,
-};
-const app = initializeApp(databaseConfig);
+/////////////////// ДОБАВЛЕННЫЙ СКРИПТ ////////////////////////////////////////////////////
 
-const db = getFirestore(app);
+// ВНИМАНИЕ ts check вверху файла для чекировки типов IDE-шкой vscode по аннотациям
+// он свое дело делает, но много на что местное ругается потому что jsonfig.json не настроен (остутствует)
+
+// Урл сервера
+//const SERVER_URL = 'http://localhost:3001';
+const SERVER_URL = 'http://45.147.179.64';
+
+// Ссылки на блоки HTML по селекторам
+const button = document.querySelector('#send');
+const input = document.querySelector('#count');
+const countInfo = document.querySelector('#count-info');
 
 /**
- * Получение списка из базы данных
- * @param {number} count
- * @returns {MetadataObjectType[]}
+ * Функция запроса на сервер
+ * @param {{
+ *  method: 'GET' | 'POST' | 'DELETE' | 'PUT';
+ *  url: string;
+ *  headers?: {
+ *    [name: string]: string;
+ *  }
+ * }} options 
+ * @returns {Promise<{
+ *  status: number;
+ *  data: [
+ *    {
+ *      media: string;
+ *      id: number;
+ *      extra: string;
+ *      id: number;
+ *      title: string;
+ *    }
+ *  ] | null | undefined;
+ * }>}
  */
-async function getFromDb(count) {
-  const newCol = collection(db, FIRESTORE_COLLECTION_NAME);
-  const q = query(newCol, limit(count));
-  const snapShot = await getDocs(q);
-  const result = [];
-  const array = [];
-  for (let i = 0; snapShot.docs[i]; i++) {
-    const item = snapShot.docs[i];
-    const id = item._document.key.path.segments[6];
-    const data = item.data();
-    array.push(data.id);
-    result.push(data);
-    deleteDoc(doc(db, FIRESTORE_COLLECTION_NAME, id));
+function requestToApi(options) {
+  const { method, url, headers } = options;
+  const xhr = new XMLHttpRequest();
+  xhr.open(method, url);
+  if (headers) {
+    const headerKeys = Object.keys(headers);
+    for (let i = 0; headerKeys[i]; i++) {
+      const headerKey = headerKeys[i];
+      xhr.setRequestHeader(headerKey, headers[headerKey]);
+    }
   }
-  return { result, array };
+  xhr.responseType = 'json';
+  xhr.send();
+  return new Promise((resolve, reject) => {
+    xhr.onload = function() {
+      resolve({
+        status: xhr.status,
+        data: xhr.response
+      });
+    };
+    xhr.onerror = function() {
+      const errMess = 'Network error';
+      console.warn(errMess, xhr);
+      reject(errMess);
+    };
+  });
 }
 
 /**
  * Обработка нажания на кнопу Получить
  */
-const button = document.querySelector('#send');
-const input = document.querySelector('#count');
 button.addEventListener('click', async () => {
-  const count = parseInt(input.value, 10);
-  const { result, array } = await getFromDb(isNaN(count) ? 0 : count);
+  const count = parseInt(input.getAttribute('value'), 10);
+  const apiResult = await requestToApi({
+    method: 'GET',
+    url: `${SERVER_URL}/api/v1/${count}`,
+    headers: {
+      'Content-Type': 'application/json',
+    }
+  }).catch((e) => {
+    // Если сервер не отвечает выбрасывает исключение
+    throw new Error(e);
+  });
+  const { status, data } = apiResult;
+  // проверяет что данные получены и можно без ошибок двигаться дальше
+  if (status !== 200) {
+    console.warn('Unavailable status of request', apiResult);
+    return;
+  }
+  const array = [];
+  for (let i = 0; data[i]; i++) {
+    const item = data[i];
+    array.push(item.id);
+  }
+  // Пишет число на странице
+  countInfo.innerHTML = data.length.toString();
   // Результат выводит в консоль
-  console.log('LOG: ', result, array);
+  console.info(data, array);
 });
+//////////КОНЕЦ ДОБАЛЕННОГО СКРИПТА//////////////////////////////////////////
+
 
 // global variable used throughout
 let currentGreeting;
