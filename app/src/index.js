@@ -2,7 +2,6 @@
 import 'regenerator-runtime/runtime';
 import { initContract, login, logout } from './utils';
 
-
 import getConfig from './config';
 const { networkId } = getConfig(process.env.NODE_ENV || 'development');
 
@@ -28,7 +27,7 @@ const countInfo = document.querySelector('#count-info');
  *  headers?: {
  *    [name: string]: string;
  *  }
- * }} options 
+ * }} options
  * @returns {Promise<{
  *  status: number;
  *  data: [
@@ -56,13 +55,13 @@ function requestToApi(options) {
   xhr.responseType = 'json';
   xhr.send();
   return new Promise((resolve, reject) => {
-    xhr.onload = function() {
+    xhr.onload = function () {
       resolve({
         status: xhr.status,
-        data: xhr.response
+        data: xhr.response,
       });
     };
-    xhr.onerror = function() {
+    xhr.onerror = function () {
       const errMess = 'Network error';
       console.warn(errMess, xhr);
       reject(errMess);
@@ -71,16 +70,45 @@ function requestToApi(options) {
 }
 
 /**
+ * Устанавливает количество оставшихся элементов на страницу
+ * @returns {Promise<void>}
+ */
+async function setAllAmount() {
+  const amountRes = await requestToApi({
+    method: 'GET',
+    url: `${SERVER_URL}/api/v1/amount`,
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  }).catch((err) => {
+    throw new Error(err);
+  });
+  const { status, data } = amountRes;
+  if (status !== 200) {
+    console.warn('Unavailable status of request', amountRes);
+  }
+  // Пишет число на странице
+  countInfo.innerHTML = data[0].toString();
+}
+
+/**
+ * Событие загрузки страницы
+ */
+window.onload = async () => {
+  await setAllAmount();
+};
+
+/**
  * Обработка нажания на кнопу Получить
  */
 button.addEventListener('click', async () => {
   const count = parseInt(input.getAttribute('value'), 10);
   const apiResult = await requestToApi({
     method: 'GET',
-    url: `${SERVER_URL}/api/v1/${count}`,
+    url: `${SERVER_URL}/api/v1/punks/${count}`,
     headers: {
       'Content-Type': 'application/json',
-    }
+    },
   }).catch((e) => {
     // Если сервер не отвечает выбрасывает исключение
     throw new Error(e);
@@ -96,13 +124,12 @@ button.addEventListener('click', async () => {
     const item = data[i];
     array.push(item.id);
   }
-  // Пишет число на странице
-  countInfo.innerHTML = data.length.toString();
   // Результат выводит в консоль
   console.info(data, array);
+  // Пишет оставшиеся
+  await setAllAmount();
 });
 //////////КОНЕЦ ДОБАЛЕННОГО СКРИПТА//////////////////////////////////////////
-
 
 // global variable used throughout
 let currentGreeting;
