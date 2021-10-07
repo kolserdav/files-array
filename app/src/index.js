@@ -103,7 +103,7 @@ window.onload = async () => {
  * Обработка нажания на кнопу Получить
  */
 button.addEventListener('click', async () => {
-  const count = parseInt(input.getAttribute('value'), 10);
+  const count = input.value;
   const apiResult = await requestToApi({
     method: 'GET',
     url: `${SERVER_URL}/api/v1/punks/${count}`,
