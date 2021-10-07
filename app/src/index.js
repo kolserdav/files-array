@@ -86,6 +86,7 @@ async function setAllAmount() {
   const { status, data } = amountRes;
   if (status !== 200) {
     console.warn('Unavailable status of request', amountRes);
+    return;
   }
   // Пишет число на странице
   countInfo.innerHTML = data[0].toString();
